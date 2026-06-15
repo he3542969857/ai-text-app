@@ -15,6 +15,7 @@ func Register(r *gin.Engine, m *task.Manager, st *store.Store) {
 	api.GET("/functions", functionsHandler)
 	api.POST("/task", taskHandler(m))
 	api.GET("/task/:id", getTaskHandler(m))
+	api.GET("/task/:id/stream", existingStreamHandler(m))
 	api.DELETE("/task/:id", cancelHandler(m))
 	api.GET("/tasks", historyHandler(st))
 }

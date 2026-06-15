@@ -22,6 +22,9 @@ func BuildMessages(typ model.TaskType, p map[string]any) []Message {
 			points = int(v)
 		}
 		sys := fmt.Sprintf("你是文本总结助手。用不超过 %d 个要点总结以下文本,每个要点单独一行,以「- 」开头。", points)
+		if v, ok := p["maxWords"].(float64); ok && v > 0 {
+			sys += fmt.Sprintf("总字数不超过 %d 字。", int(v))
+		}
 		return []Message{{Role: "system", Content: sys}, {Role: "user", Content: text}}
 	}
 	return []Message{{Role: "user", Content: text}}

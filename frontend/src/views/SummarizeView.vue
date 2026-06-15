@@ -1,17 +1,23 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { NInput, NInputNumber } from 'naive-ui'
+import { NInputNumber } from 'naive-ui'
 import StreamOutput from '../components/StreamOutput.vue'
+import BigTextInput from '../components/BigTextInput.vue'
 import { useStreamTask } from '../composables/useStreamTask'
 
 const text = ref('')
 const maxPoints = ref(3)
+const maxWords = ref(0) // 0 = 不限字数
 
-const { output, status, elapsedMs, errorMsg, run, stop } = useStreamTask()
+const { output, status, polledStatus, elapsedMs, errorMsg, run, stop } = useStreamTask()
 
 async function submit() {
   if (!text.value.trim()) return
-  await run('summarize', { text: text.value, maxPoints: maxPoints.value })
+  await run('summarize', {
+    text: text.value,
+    maxPoints: maxPoints.value,
+    maxWords: maxWords.value,
+  })
 }
 
 const statusMeta = computed(() => {
@@ -34,16 +40,24 @@ const statusMeta = computed(() => {
     </header>
 
     <section class="ap-card panel">
-      <div class="points">
-        <span class="points-label">🎯 要点数</span>
-        <n-input-number v-model:value="maxPoints" :min="1" :max="10" class="points-input" />
+      <div class="controls">
+        <div class="ctl">
+          <span class="ctl-label">🎯 要点数</span>
+          <n-input-number v-model:value="maxPoints" :min="1" :max="10" class="ctl-input" />
+        </div>
+        <div class="ctl">
+          <span class="ctl-label">📏 字数上限</span>
+          <n-input-number
+            v-model:value="maxWords"
+            :min="0"
+            :max="2000"
+            :step="50"
+            placeholder="0=不限"
+            class="ctl-input"
+          />
+        </div>
       </div>
-      <n-input
-        v-model:value="text"
-        type="textarea"
-        placeholder="粘贴需要总结的长文本…"
-        :autosize="{ minRows: 6, maxRows: 18 }"
-      />
+      <BigTextInput v-model="text" placeholder="粘贴需要总结的长文本…" :min-rows="6" />
       <div class="actions">
         <button class="ap-btn" :disabled="status === 'running' || !text.trim()" @click="submit">
           总结 ✨
@@ -52,6 +66,7 @@ const statusMeta = computed(() => {
           停止生成
         </button>
         <span class="status" :class="statusMeta.cls">{{ statusMeta.emoji }} {{ statusMeta.label }}</span>
+        <span v-if="polledStatus" class="poll">📡 轮询: {{ polledStatus }}</span>
         <span v-if="elapsedMs > 0" class="elapsed">⏱ {{ elapsedMs }} ms</span>
       </div>
       <p v-if="errorMsg" class="err">⚠️ {{ errorMsg }}</p>
@@ -82,17 +97,22 @@ const statusMeta = computed(() => {
   flex-direction: column;
   gap: 16px;
 }
-.points {
+.controls {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.ctl {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-.points-label {
+.ctl-label {
   font-size: 15px;
   color: var(--text-secondary);
 }
-.points-input {
-  width: 130px;
+.ctl-input {
+  width: 140px;
 }
 .actions {
   display: flex;
@@ -123,6 +143,11 @@ const statusMeta = computed(() => {
 .elapsed {
   font-size: 13px;
   color: var(--text-tertiary);
+}
+.poll {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 .err {
   margin: 0;

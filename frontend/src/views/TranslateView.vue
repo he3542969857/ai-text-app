@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { NInput, NSelect } from 'naive-ui'
+import { NSelect } from 'naive-ui'
 import StreamOutput from '../components/StreamOutput.vue'
+import BigTextInput from '../components/BigTextInput.vue'
 import { useStreamTask } from '../composables/useStreamTask'
 
 const text = ref('')
@@ -11,7 +12,7 @@ const directionOptions = [
   { label: '🇨🇳 中 → 英 🇬🇧', value: 'zh2en' },
 ]
 
-const { output, status, elapsedMs, errorMsg, run, stop } = useStreamTask()
+const { output, status, polledStatus, elapsedMs, errorMsg, run, stop } = useStreamTask()
 
 async function submit() {
   if (!text.value.trim()) return
@@ -40,12 +41,7 @@ const statusMeta = computed(() => {
 
     <section class="ap-card panel">
       <n-select v-model:value="direction" :options="directionOptions" class="dir" />
-      <n-input
-        v-model:value="text"
-        type="textarea"
-        placeholder="输入要翻译的文本…"
-        :autosize="{ minRows: 4, maxRows: 12 }"
-      />
+      <BigTextInput v-model="text" placeholder="输入要翻译的文本…" :min-rows="4" />
       <div class="actions">
         <button class="ap-btn" :disabled="status === 'running' || !text.trim()" @click="submit">
           翻译 ✨
@@ -54,6 +50,7 @@ const statusMeta = computed(() => {
           停止生成
         </button>
         <span class="status" :class="statusMeta.cls">{{ statusMeta.emoji }} {{ statusMeta.label }}</span>
+        <span v-if="polledStatus" class="poll">📡 轮询: {{ polledStatus }}</span>
         <span v-if="elapsedMs > 0" class="elapsed">⏱ {{ elapsedMs }} ms</span>
       </div>
       <p v-if="errorMsg" class="err">⚠️ {{ errorMsg }}</p>
@@ -116,6 +113,11 @@ const statusMeta = computed(() => {
 .elapsed {
   font-size: 13px;
   color: var(--text-tertiary);
+}
+.poll {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
 }
 .err {
   margin: 0;
