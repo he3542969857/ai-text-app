@@ -175,13 +175,13 @@ ai-app summarize --text "长文本..." --max-points 3
 ## 9. 交付物清单
 
 - [x] 项目源码仓库(本仓库)
-- [ ] `skill.md` + Agent 调用截图
-- [ ] `agent.md`、`spec/`(加分①)
-- [ ] 前后端全栈深度(加分②)
-- [ ] 异步任务+轮询(加分③)
-- [ ] 数据闭环 + 历史页(加分④)
-- [ ] `Dockerfile` + `docker-compose.yml`(加分⑤)
-- [ ] `README.md`:项目介绍/演示、技术栈、本地运行、API 文档
+- [x] `skill.md`(Agent 可发现) + ⏳ Agent 调用截图(需人工补)
+- [x] `agent.md`、`spec/`(加分①)
+- [x] 前后端全栈深度(加分②)
+- [x] 异步任务+轮询(加分③)
+- [x] 数据闭环 + 历史页(加分④)
+- [x] `Dockerfile` + `docker-compose.yml`(加分⑤)
+- [x] `README.md`:项目介绍/演示、技术栈、本地运行、API 文档
 
 ## 10. 非目标(YAGNI)
 
