@@ -6,8 +6,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: aitext
-    ports:
-      - "5432:5432"
+    # 仅供 docker 内网访问,不对主机暴露(避免与宿主已有服务端口冲突)
+    expose:
+      - "5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
