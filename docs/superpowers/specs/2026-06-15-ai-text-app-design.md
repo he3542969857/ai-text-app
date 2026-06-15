@@ -13,7 +13,7 @@
 - **加分①**:SDD/TDD 流程(本设计文档 + `spec/` + `agent.md`,经 superpowers 工作流产出)。
 - **加分②**:全栈深度 — 前端虚拟滚动/流式渲染/深浅主题/响应式;后端参数校验/统一错误/日志追踪/超时控制。
 - **加分③**:异步任务与轮询 — 内存队列 + worker + 状态机 + 前端轮询。
-- **加分④**:数据闭环 — SQLite 记录每次调用的输入/输出/耗时/状态 + 历史查询页。
+- **加分④**:数据闭环 — PostgreSQL 记录每次调用的输入/输出/耗时/状态 + 历史查询页。
 - **加分⑤**:Docker — `Dockerfile` + `docker-compose.yml` 一键启动。
 
 ## 2. 技术栈
@@ -23,7 +23,7 @@
 | 前端 | Vue 3 + TypeScript + Vite + Naive UI + Pinia + Vue Router |
 | 后端 | Go + Gin |
 | 大模型 | DeepSeek(`deepseek-chat`,OpenAI 兼容,`stream:true`);无 Key 时 Mock fallback |
-| 存储 | SQLite(数据闭环历史) |
+| 存储 | PostgreSQL(数据闭环历史,pgx/pgxpool 驱动) |
 | CLI | Go + cobra |
 | 部署 | Docker + docker-compose |
 
@@ -37,7 +37,7 @@ POST /api/task
   → Worker 取任务 → running → 调 DeepSeek 流式
   → 每个 token publish 到该任务的 pub/sub broker
   → SSE handler subscribe → 逐 token 转发前端(打字机)
-  → 完成 → done/failed,结果+耗时写入 SQLite
+  → 完成 → done/failed,结果+耗时写入 Postgres
 
 GET    /api/task/{id}   → 轮询状态/进度(pending/running/done/failed/cancelled)
 GET    /api/tasks       → 历史列表(查询页)
@@ -56,7 +56,7 @@ backend/
     model/       # Task、TaskStatus、TaskType、FunctionDef
     llm/         # Client 接口 + DeepSeekClient(流式) + MockClient
     task/        # Queue、Worker、Broker(pub/sub)、Manager(registry)
-    store/       # SQLite Repository
+    store/       # PostgreSQL Repository(pgxpool)
     handler/     # functions / task(SSE) / cancel / history
     middleware/  # traceID 日志 / recover 统一错误 / 参数校验
 ```
@@ -162,13 +162,13 @@ ai-app summarize --text "长文本..." --max-points 3
 ```
 前端输入 → POST /api/task → 入队 → worker 取 → running
   → DeepSeek 流式 → token 经 Broker → SSE → 前端打字机
-  → 完成 → 写 SQLite → 历史页可查
+  → 完成 → 写 Postgres → 历史页可查
 取消:DELETE → cancel context → HTTP 中断 → cancelled
 ```
 
 ## 8. 测试策略(TDD 红绿)
 
-- **后端** `go test` + `httptest`:覆盖 Broker pub/sub、任务生命周期状态机、SSE 事件解析、取消、SQLite 仓储、Mock LLM 流式。表驱动。
+- **后端** `go test` + `httptest`:覆盖 Broker pub/sub、任务生命周期状态机、SSE 事件解析、取消、Postgres 仓储、Mock LLM 流式。表驱动。
 - **前端** Vitest + Vue Test Utils:测 StreamOutput 渲染、Pinia store(mock SSE 流)、SSE 解析器。
 - **CLI**:对 httptest server 测命令解析与流式输出。
 
@@ -186,5 +186,5 @@ ai-app summarize --text "长文本..." --max-points 3
 ## 10. 非目标(YAGNI)
 
 - 不做用户认证/多租户。
-- 不做 Redis/Celery(内存队列足够;设计预留接口便于替换)。
+- 不做 Redis/Celery(内存队列足够;设计预留接口便于替换)。Postgres 仅用于历史记录,不承担队列。
 - 不做生产级分布式;聚焦单机一键启动与功能完整。

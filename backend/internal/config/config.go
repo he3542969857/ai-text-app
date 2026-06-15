@@ -12,7 +12,7 @@ type Config struct {
 	DeepSeekBase   string
 	Model          string
 	TimeoutSec     int
-	DBPath         string
+	DatabaseURL    string
 }
 
 // Load 读取环境变量并填充默认值。
@@ -23,7 +23,7 @@ func Load() Config {
 		DeepSeekBase:   env("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
 		Model:          env("DEEPSEEK_MODEL", "deepseek-chat"),
 		TimeoutSec:     envInt("REQUEST_TIMEOUT_SEC", 60),
-		DBPath:         env("DB_PATH", "data.db"),
+		DatabaseURL:    env("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/aitext?sslmode=disable"),
 	}
 }
 
