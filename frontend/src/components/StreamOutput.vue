@@ -79,15 +79,16 @@ watch(
 <style scoped>
 .stream-output {
   overflow-y: auto;
-  border: 1px solid var(--n-border-color, #e0e0e6);
-  border-radius: 6px;
-  padding: 12px;
-  background: rgba(128, 128, 128, 0.04);
-  font-family: 'Menlo', 'Consolas', monospace;
+  border: 0.5px solid var(--border, #e0e0e6);
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: color-mix(in srgb, var(--text, #000) 3%, transparent);
+  font-family: 'SF Mono', 'Menlo', 'Consolas', monospace;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
+  color: var(--text);
 }
 .line {
   white-space: pre-wrap;
