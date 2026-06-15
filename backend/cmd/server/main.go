@@ -2,9 +2,12 @@ package main
 
 import (
 	"log"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 
 	"ai-text-app/backend/internal/config"
 	"ai-text-app/backend/internal/handler"
@@ -14,6 +17,9 @@ import (
 )
 
 func main() {
+	_ = godotenv.Load() // best-effort 加载 .env(不存在则忽略)
+	sanitizeProxyEnv()  // 修正代理变量首尾空白,避免 HTTP 客户端解析失败
+
 	cfg := config.Load()
 
 	st, err := store.New(cfg.DatabaseURL)
@@ -41,6 +47,20 @@ func main() {
 	log.Printf("后端启动,监听 :%s", cfg.Port)
 	if err := r.Run(":" + cfg.Port); err != nil {
 		log.Fatal(err)
+	}
+}
+
+// sanitizeProxyEnv 去除代理环境变量值首尾空白。
+// 某些环境下 HTTPS_PROXY 末尾混入空格会导致 Go HTTP 客户端报
+// "Unsupported proxy syntax / Malformed input to a URL function"。
+func sanitizeProxyEnv() {
+	for _, k := range []string{"HTTP_PROXY", "HTTPS_PROXY", "NO_PROXY",
+		"http_proxy", "https_proxy", "no_proxy"} {
+		if v, ok := os.LookupEnv(k); ok {
+			if trimmed := strings.TrimSpace(v); trimmed != v {
+				_ = os.Setenv(k, trimmed)
+			}
+		}
 	}
 }
 
