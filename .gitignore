@@ -1,0 +1,14 @@
+# deps
+node_modules/
+# build
+dist/
+backend/server
+backend/*.exe
+cli/ai-app
+cli/*.exe
+# env & db
+.env
+*.db
+*.sqlite
+# os
+.DS_Store
