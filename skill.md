@@ -84,4 +84,11 @@ ai-app summarize --text "一段很长的文本……" --max-points 3
   2. 组装命令:`ai-app translate --text "..." --from en --to zh --json`。
   3. 通过 shell 执行,读取 stdout(流式文本)或 `--json` 结构化结果。
 
-> 📸 验证:在 Agent(如 Claude Code)中请求"把 Hello 翻译成中文",Agent 应发现并执行 `ai-app translate --text "Hello" --from en --to zh`。请将该调用过程截图保存为 `docs/agent-invocation.png` 作为交付凭证。
+## Agent 调用凭证(截图)
+
+下图为 Claude Code(Agent)读取本 `skill.md` 发现工具后,**真实执行** `ai-app translate` 的过程(真命令 + 真 DeepSeek 输出):
+
+![Agent 调用截图](docs/agent-invocation.png)
+
+> 复现:在 Agent(如 Claude Code)中请求"用 ai-app 把这句英文翻译成中文",Agent 会发现并执行
+> `ai-app translate --text "..." --from en --to zh`,流式返回译文。

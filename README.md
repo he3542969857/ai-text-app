@@ -133,6 +133,10 @@ data: {"status":"done","elapsedMs":1234}
 
 `ai-app` CLI 可被 Agent 发现并调用,详见 [`skill.md`](./skill.md)。典型流程:Agent 识别意图 → 组装 `ai-app translate --text "..." --from en --to zh --json` → 执行并读取结果。
 
+下图为 Claude Code 读取 `skill.md` 后真实执行 `ai-app` 的调用凭证:
+
+![Agent 调用截图](docs/agent-invocation.png)
+
 ## 📐 架构说明
 
 **统一任务模型 + 双消费通道**:`POST /api/task` 创建任务并入内存队列,同时返回 SSE 连接;worker 调 DeepSeek 流式,token 经 per-task pub/sub Broker 广播给 SSE 订阅者;任务完成写入 PostgreSQL。这样同一个任务既能实时流式消费,又能轮询查状态、落库查历史 —— 把"SSE 流式"与"异步队列+轮询"两个需求统一在一套抽象里。
